@@ -6,14 +6,16 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
 type Image struct {
 	Filename  string
+	Name      string
 	Extension string
 }
 
-func getImagesInCurrentDir() ([]string, error) {
+func getImagesInCurrentDir() ([]Image, error) {
 	// Define common image file extensions
 	imageExtensions := map[string]bool{
 		".jpg":  true,
@@ -31,7 +33,7 @@ func getImagesInCurrentDir() ([]string, error) {
 		return nil, err
 	}
 
-	var images []string
+	var images []Image
 	// Iterate over each entry
 	for _, entry := range entries {
 		// Skip directories
@@ -47,7 +49,12 @@ func getImagesInCurrentDir() ([]string, error) {
 		// Check if the extension is in the list of image extensions
 		if imageExtensions[ext] {
 			// Append the full path to the result slice
-			images = append(images, filepath.Join(".", entry.Name()))
+			newImage := Image{
+				Filename:  entry.Name(),
+				Extension: ext,
+				Name:      strings.Split(entry.Name(), ".")[0],
+			}
+			images = append(images, newImage)
 		}
 	}
 	return images, nil
@@ -69,15 +76,13 @@ func main() {
 	}
 	for _, img := range images {
 		fmt.Println(img)
-		// convert 02\ PRINT\ ARTORIAS\ imprimir.png -colorspace CMYK -profile USWebCoatedSWOP.icc image_CMYK.png
-		cmd := exec.Command(magickCommand, img, "-colorspace", "CMYK", "-profile", "USWebCoatedSWOP.icc", "cmyk_"+img)
-		stdout, err := cmd.Output()
+		//convert 02\ PRINT\ ARTORIAS\ imprimir.png -colorspace CMYK -profile USWebCoatedSWOP.icc image_CMYK.png
+		cmd := exec.Command(magickCommand, img.Filename, "-colorspace", "CMYK", "-profile", "USWebCoatedSWOP.icc", "cmyk_"+img.Name+".jpg")
+		_, err := cmd.Output()
 		if err != nil {
 			fmt.Println("Error ", err)
 			os.Exit(0)
 		}
-
-		fmt.Println(stdout)
 	}
 
 }
