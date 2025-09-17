@@ -67,13 +67,17 @@ func main() {
 		magickCommand = "magick.exe"
 	}
 
-	fmt.Println(magickCommand)
-
 	images, err := getImagesInCurrentDir()
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
 	}
+
+	if len(images) == 0 {
+		fmt.Println("No se encontraron imágenes. Arrastra imágenes a esta carpeta")
+		os.Exit(0)
+	}
+
 	for _, img := range images {
 		fmt.Println(img)
 		//convert 02\ PRINT\ ARTORIAS\ imprimir.png -colorspace CMYK -profile USWebCoatedSWOP.icc image_CMYK.png
