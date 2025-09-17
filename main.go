@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -13,6 +15,34 @@ type Image struct {
 	Filename  string
 	Name      string
 	Extension string
+}
+
+func downloadCMYKProfile() *error {
+	file, err := os.Create("USWebCoatedSWOP.icc")
+	if err != nil {
+		return &err
+	}
+	defer file.Close()
+
+	// Send HTTP GET request
+	resp, err := http.Get("www.color.org/registry/profiles/SWOP2006_Coated3v2.icc")
+	if err != nil {
+		return &err
+	}
+	defer resp.Body.Close()
+
+	// Check if the request was successful
+	if resp.StatusCode != http.StatusOK {
+		return &err
+	}
+
+	// Copy the response body to the file
+	_, err = io.Copy(file, resp.Body)
+	if err != nil {
+		return &err
+	}
+
+	return nil
 }
 
 func getImagesInCurrentDir() ([]Image, error) {
@@ -59,6 +89,15 @@ func getImagesInCurrentDir() ([]Image, error) {
 	}
 	return images, nil
 }
+
+func fileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
+}
+
 func main() {
 
 	magickCommand := "magick"
@@ -72,7 +111,9 @@ func main() {
 		fmt.Println("Error:", err)
 		return
 	}
-
+	if !fileExists("USWebCoatedSWOP.icc") {
+		downloadCMYKProfile()
+	}
 	if len(images) == 0 {
 		fmt.Println("No se encontraron imágenes. Arrastra imágenes a esta carpeta")
 		os.Exit(0)
