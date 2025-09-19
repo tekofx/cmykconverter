@@ -16,10 +16,14 @@ func main() {
 		return
 	}
 	if !utils.FileExists("USWebCoatedSWOP.icc") {
+		fmt.Println("Descargando perfil de color CMYK")
 		utils.DownloadCMYKProfile()
+		fmt.Println("Descargado!")
 	}
 	if !utils.FolderExists("imagemagick") {
+		fmt.Println("Descargando imagemagick")
 		utils.DownloadFile("https://imagemagick.org/archive/binaries/ImageMagick-7.1.2-3-portable-Q16-x64.zip", "imagemagick.zip")
+		fmt.Println("Descargado")
 		utils.ExtractFile("imagemagick.zip", "imagemagick")
 		os.Remove("imagemagick.zip")
 	}
