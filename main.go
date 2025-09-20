@@ -9,15 +9,14 @@ import (
 )
 
 func main() {
-
 	images, err := utils.GetImagesInCurrentDir()
 	if err != nil {
 		fmt.Println("Error:", err)
-		return
+		os.Exit(0)
 	}
 	if !utils.FileExists("USWebCoatedSWOP.icc") {
 		fmt.Println("Descargando perfil de color CMYK")
-		utils.DownloadCMYKProfile()
+		utils.DownloadFile("www.color.org/registry/profiles/SWOP2006_Coated3v2.icc", "USWebCoatedSWOP.icc")
 		fmt.Println("Descargado!")
 	}
 	if !utils.FolderExists("imagemagick") {
@@ -27,19 +26,24 @@ func main() {
 		utils.ExtractFile("imagemagick.zip", "imagemagick")
 		os.Remove("imagemagick.zip")
 	}
-
 	if len(images) == 0 {
 		fmt.Println("No se encontraron imágenes. Arrastra imágenes a esta carpeta")
 		os.Exit(0)
 	}
-
 	for _, img := range images {
-		cmd := exec.Command("imagemagick/magick.exe", img.Filename, "-colorspace", "CMYK", "-profile", "USWebCoatedSWOP.icc", "cmyk_"+img.Name+".jpg")
+		cmd := exec.Command(
+			"imagemagick/magick.exe",
+			img.Filename,
+			"-colorspace",
+			"CMYK",
+			"-profile",
+			"USWebCoatedSWOP.icc",
+			"cmyk_"+img.Name+".jpg",
+		)
 		_, err := cmd.Output()
 		if err != nil {
 			fmt.Println("Error ", err)
 			os.Exit(0)
 		}
 	}
-
 }

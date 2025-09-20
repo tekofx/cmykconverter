@@ -11,34 +11,6 @@ import (
 	"github.com/tekofx/cmykconverter/internal/models"
 )
 
-func DownloadCMYKProfile() *error {
-	file, err := os.Create("USWebCoatedSWOP.icc")
-	if err != nil {
-		return &err
-	}
-	defer file.Close()
-
-	// Send HTTP GET request
-	resp, err := http.Get("www.color.org/registry/profiles/SWOP2006_Coated3v2.icc")
-	if err != nil {
-		return &err
-	}
-	defer resp.Body.Close()
-
-	// Check if the request was successful
-	if resp.StatusCode != http.StatusOK {
-		return &err
-	}
-
-	// Copy the response body to the file
-	_, err = io.Copy(file, resp.Body)
-	if err != nil {
-		return &err
-	}
-
-	return nil
-}
-
 func GetImagesInCurrentDir() ([]models.Image, error) {
 	// Define common image file extensions
 	imageExtensions := map[string]bool{
