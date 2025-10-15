@@ -12,6 +12,8 @@ func main() {
 	images, err := utils.GetImagesInCurrentDir()
 	if err != nil {
 		fmt.Println("Error:", err)
+		fmt.Println("Pulsa Enter para continuar...")
+		fmt.Scanln() // Waits for Enter key press
 		os.Exit(0)
 	}
 	if !utils.FileExists("USWebCoatedSWOP.icc") {
@@ -27,7 +29,9 @@ func main() {
 		os.Remove("imagemagick.zip")
 	}
 	if len(images) == 0 {
-		fmt.Println("No se encontraron imágenes. Arrastra imágenes a esta carpeta")
+		fmt.Println("No se encontraron imágenes. Arrastra imágenes a esta carpeta antes de iniciar el programa.")
+		fmt.Println("Pulsa Enter para continuar...")
+		fmt.Scanln() // Waits for Enter key press
 		os.Exit(0)
 	}
 	for _, img := range images {
@@ -43,6 +47,8 @@ func main() {
 		_, err := cmd.Output()
 		if err != nil {
 			fmt.Println("Error ", err)
+			fmt.Println("Pulsa Enter para continuar...")
+			fmt.Scanln() // Waits for Enter key press
 			os.Exit(0)
 		}
 	}
