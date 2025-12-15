@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/bodgit/sevenzip"
+	"github.com/minio/selfupdate"
 	"github.com/tekofx/cmykconverter/internal/models"
 )
 
@@ -28,7 +29,7 @@ func CheckCmykConverterUpdates() error {
 	}
 
 	if VERSION != release.TagName {
-		err = DownloadFile(release.Assets[0].Url, "cmykconverter.exe")
+		err = doUpdate(release.Assets[0].Url)
 		if err != nil {
 			return err
 		}
@@ -41,6 +42,16 @@ func CheckCmykConverterUpdates() error {
 	// Now you can use release.TagName, release.Url, etc.
 	return nil
 
+}
+
+func doUpdate(url string) error {
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	err = selfupdate.Apply(resp.Body, selfupdate.Options{})
+	return err
 }
 
 func GetImagesInCurrentDir() ([]models.Image, error) {
