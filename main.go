@@ -23,7 +23,7 @@ func main() {
 	}
 	if !utils.FileExists("USWebCoatedSWOP.icc") {
 		fmt.Println("Descargando perfil de color CMYK")
-		err = utils.DownloadFile("www.color.org/registry/profiles/SWOP2006_Coated3v2.icc", "USWebCoatedSWOP.icc")
+		err = utils.DownloadFile("https://www.color.org/registry/profiles/SWOP2006_Coated3v2.icc", "USWebCoatedSWOP.icc")
 		if err != nil {
 			errors.ManagerError(err)
 		}
