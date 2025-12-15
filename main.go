@@ -40,6 +40,10 @@ func main() {
 		if err != nil {
 			errors.ManagerError(err)
 		}
+		err = os.Remove("imagemagick.7z")
+		if err != nil {
+			errors.ManagerError(err)
+		}
 		fmt.Println("Descargado")
 	}
 
