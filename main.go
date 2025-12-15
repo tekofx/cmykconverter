@@ -67,7 +67,7 @@ func main() {
 			"-colorspace",
 			"CMYK",
 			"-profile",
-			"USWebCoatedSWOP.icc",
+			filepath.Join(utils.DataFolder, "USWebCoatedSWOP.icc"),
 			"cmyk_"+img.Name+".jpg",
 		)
 		_, err := cmd.Output()
