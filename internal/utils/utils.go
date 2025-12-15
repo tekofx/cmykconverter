@@ -2,6 +2,8 @@ package utils
 
 import (
 	"archive/zip"
+	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -10,6 +12,38 @@ import (
 
 	"github.com/tekofx/cmykconverter/internal/models"
 )
+
+const VERSION = "0.4"
+
+func CheckCmykConverterUpdates() error {
+	resp, err := http.Get("https://api.github.com/repos/tekofx/cmykconverter/releases/latest")
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	var release models.GithubRelease
+	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
+		return err
+	}
+
+	if VERSION != release.TagName {
+		err = DownloadFile(release.Assets[0].Url, "cmykconverter.exe")
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("Se ha actualizado cymkconverter a la version %s. Pulse ENTER para cerrar el programa y vuelva a abrirlo.", release.TagName)
+		fmt.Scanln() // Waits for Enter key press
+		os.Exit(0)
+	} else {
+		fmt.Println("Same version")
+	}
+
+	// Now you can use release.TagName, release.Url, etc.
+	return nil
+
+}
 
 func GetImagesInCurrentDir() ([]models.Image, error) {
 	// Define common image file extensions

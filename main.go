@@ -9,6 +9,13 @@ import (
 )
 
 func main() {
+	err := utils.CheckCmykConverterUpdates()
+	if err != nil {
+		fmt.Println("Error:", err)
+		fmt.Println("Pulsa Enter para continuar...")
+		fmt.Scanln() // Waits for Enter key press
+		os.Exit(0)
+	}
 	images, err := utils.GetImagesInCurrentDir()
 	if err != nil {
 		fmt.Println("Error:", err)
