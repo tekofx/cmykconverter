@@ -14,6 +14,19 @@ import (
 	"github.com/tekofx/cmykconverter/internal/models"
 )
 
+var DataFolder string
+
+func SetupDataFolder() error {
+	configDir, err := os.UserConfigDir()
+	if err != nil {
+		return err
+	}
+	DataFolder = filepath.Join(configDir, "cmykconverter")
+	fmt.Println(DataFolder)
+	err = os.MkdirAll(DataFolder, 0700)
+	return err
+}
+
 func CheckCmykConverterUpdates() error {
 	resp, err := http.Get("https://api.github.com/repos/tekofx/cmykconverter/releases/latest")
 	if err != nil {
@@ -53,7 +66,7 @@ func CheckCmykConverterUpdates() error {
 }
 
 func saveVersion(version string) error {
-	file, err := os.Create(".meta.json")
+	file, err := os.Create(filepath.Join(DataFolder, ".meta.json"))
 	if err != nil {
 		return err
 	}
@@ -64,7 +77,7 @@ func saveVersion(version string) error {
 }
 
 func LoadVersion() (string, error) {
-	file, err := os.Open(".meta.json")
+	file, err := os.Open(filepath.Join(DataFolder, ".meta.json"))
 	if err != nil {
 		return "", nil
 	}
