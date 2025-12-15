@@ -26,7 +26,7 @@ func CheckCmykConverterUpdates() error {
 		return err
 	}
 
-	version, err := loadVersion()
+	version, err := LoadVersion()
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func saveVersion(version string) error {
 	return encoder.Encode(models.Meta{Version: version})
 }
 
-func loadVersion() (string, error) {
+func LoadVersion() (string, error) {
 	file, err := os.Open(".meta.json")
 	if err != nil {
 		return "", nil
