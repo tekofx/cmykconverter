@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"archive/zip"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,10 +9,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/bodgit/sevenzip"
 	"github.com/tekofx/cmykconverter/internal/models"
 )
 
-const VERSION = "0.4"
+const VERSION = "0.5"
 
 func CheckCmykConverterUpdates() error {
 	resp, err := http.Get("https://api.github.com/repos/tekofx/cmykconverter/releases/latest")
@@ -36,8 +36,6 @@ func CheckCmykConverterUpdates() error {
 		fmt.Printf("Se ha actualizado cymkconverter a la version %s. Pulse ENTER para cerrar el programa y vuelva a abrirlo.", release.TagName)
 		fmt.Scanln() // Waits for Enter key press
 		os.Exit(0)
-	} else {
-		fmt.Println("Same version")
 	}
 
 	// Now you can use release.TagName, release.Url, etc.
@@ -131,60 +129,20 @@ func DownloadFile(url string, filepath string) error {
 }
 
 func ExtractFile(zipPath, destDir string) error {
-	r, err := zip.OpenReader(zipPath)
+	r, err := sevenzip.OpenReader(zipPath)
 	if err != nil {
 		return err
 	}
 	defer r.Close()
 
-	if err := os.MkdirAll(destDir, 0755); err != nil {
-		return err
-	}
-
 	for _, f := range r.File {
-		// Skip the root directory entry itself (if any)
-		if isRootDir(f.Name) {
-			continue
-		}
-
-		// Remove the first directory component (e.g., "project/" from "project/file.txt")
-		trimmedName := trimFirstDir(f.Name)
-
-		filePath := filepath.Join(destDir, trimmedName)
-
-		if !strings.HasPrefix(filePath, filepath.Clean(destDir)+string(os.PathSeparator)) {
-			continue // Skip unsafe paths
-		}
-
-		if f.FileInfo().IsDir() {
-			if err := os.MkdirAll(filePath, f.Mode()); err != nil {
-				return err
-			}
-			continue
-		}
-
-		if err := os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
-			return err
-		}
-
-		srcFile, err := f.Open()
+		rc, err := f.Open()
 		if err != nil {
 			return err
 		}
+		defer rc.Close()
 
-		dstFile, err := os.Create(filePath)
-		if err != nil {
-			srcFile.Close()
-			return err
-		}
-
-		_, err = io.Copy(dstFile, srcFile)
-		srcFile.Close()
-		dstFile.Close()
-
-		if err != nil {
-			return err
-		}
+		// Extract the file
 	}
 
 	return nil
