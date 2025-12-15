@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/tekofx/cmykconverter/internal/errors"
 	"github.com/tekofx/cmykconverter/internal/utils"
 )
 
@@ -14,21 +15,18 @@ func main() {
 
 	err = utils.CheckCmykConverterUpdates()
 	if err != nil {
-		fmt.Println("Error:", err)
-		fmt.Println("Pulsa Enter para continuar...")
-		fmt.Scanln() // Waits for Enter key press
-		os.Exit(0)
+		errors.ManagerError(err)
 	}
 	images, err := utils.GetImagesInCurrentDir()
 	if err != nil {
-		fmt.Println("Error:", err)
-		fmt.Println("Pulsa Enter para continuar...")
-		fmt.Scanln() // Waits for Enter key press
-		os.Exit(0)
+		errors.ManagerError(err)
 	}
 	if !utils.FileExists("USWebCoatedSWOP.icc") {
 		fmt.Println("Descargando perfil de color CMYK")
-		utils.DownloadFile("www.color.org/registry/profiles/SWOP2006_Coated3v2.icc", "USWebCoatedSWOP.icc")
+		err = utils.DownloadFile("www.color.org/registry/profiles/SWOP2006_Coated3v2.icc", "USWebCoatedSWOP.icc")
+		if err != nil {
+			errors.ManagerError(err)
+		}
 		fmt.Println("Descargado!")
 	}
 
@@ -36,13 +34,11 @@ func main() {
 		fmt.Println("Descargando imagemagick")
 		err := utils.DownloadFile("https://github.com/ImageMagick/ImageMagick/releases/download/7.1.2-11/ImageMagick-7.1.2-11-portable-Q16-x64.7z", "imagemagick.7z")
 		if err != nil {
-			fmt.Println(err)
-			return
+			errors.ManagerError(err)
 		}
 		err = utils.ExtractFile("imagemagick.7z", "imagemagick")
 		if err != nil {
-			fmt.Println(err)
-			return
+			errors.ManagerError(err)
 		}
 		fmt.Println("Descargado")
 	}
@@ -66,10 +62,7 @@ func main() {
 		)
 		_, err := cmd.Output()
 		if err != nil {
-			fmt.Println("Error ", err)
-			fmt.Println("Pulsa Enter para continuar...")
-			fmt.Scanln() // Waits for Enter key press
-			os.Exit(0)
+			errors.ManagerError(err)
 		}
 	}
 }
