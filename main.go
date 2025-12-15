@@ -11,13 +11,13 @@ import (
 )
 
 func main() {
-	version, err := utils.LoadVersion()
-	fmt.Printf("Cmyk Converter - Version %s\n", version)
-
-	err = utils.SetupDataFolder()
+	err := utils.SetupDataFolder()
 	if err != nil {
 		errors.ManagerError(err)
 	}
+
+	version, err := utils.LoadVersion()
+	fmt.Printf("Cmyk Converter - Version %s\n", version)
 
 	err = utils.CheckCmykConverterUpdates()
 	if err != nil {
