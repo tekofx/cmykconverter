@@ -29,7 +29,7 @@ func CheckCmykConverterUpdates() error {
 	}
 
 	if VERSION != release.TagName {
-		err = doUpdate(release.Assets[0].Url)
+		err = doUpdate(release.Assets[0].BrowserDownloadUrl)
 		if err != nil {
 			return err
 		}

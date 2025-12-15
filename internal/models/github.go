@@ -8,6 +8,6 @@ type GithubRelease struct {
 }
 
 type GithubAsset struct {
-	Url  string `json:"url"`
-	Name string `json:"name"`
+	BrowserDownloadUrl string `json:"browser_download_url"`
+	Name               string `json:"name"`
 }
