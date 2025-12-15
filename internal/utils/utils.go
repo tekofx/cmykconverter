@@ -22,8 +22,11 @@ func SetupDataFolder() error {
 		return err
 	}
 	DataFolder = filepath.Join(configDir, "cmykconverter")
-	fmt.Println(DataFolder)
-	err = os.MkdirAll(DataFolder, 0700)
+
+	if !dirExists(DataFolder) {
+		err = os.MkdirAll(DataFolder, 0700)
+	}
+
 	return err
 }
 
@@ -152,6 +155,14 @@ func FileExists(filename string) bool {
 		return false
 	}
 	return !info.IsDir()
+}
+
+func dirExists(dir string) bool {
+	info, err := os.Stat(dir)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return info.IsDir()
 }
 func ExtractFile(zipPath, destDir string) error {
 	r, err := sevenzip.OpenReader(zipPath)
