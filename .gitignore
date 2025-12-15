@@ -3,3 +3,5 @@
 *.icc
 imagemagick
 cmykconverter*
+*.7z
+.meta.json
