@@ -14,8 +14,6 @@ import (
 	"github.com/tekofx/cmykconverter/internal/models"
 )
 
-const VERSION = "0.5"
-
 func CheckCmykConverterUpdates() error {
 	resp, err := http.Get("https://api.github.com/repos/tekofx/cmykconverter/releases/latest")
 	if err != nil {
@@ -28,8 +26,18 @@ func CheckCmykConverterUpdates() error {
 		return err
 	}
 
-	if VERSION != release.TagName {
+	version, err := loadVersion()
+	if err != nil {
+		return err
+	}
+
+	if version != release.TagName {
 		err = doUpdate(release.Assets[0].BrowserDownloadUrl)
+		if err != nil {
+			return err
+		}
+
+		err = saveVersion(release.TagName)
 		if err != nil {
 			return err
 		}
@@ -42,6 +50,32 @@ func CheckCmykConverterUpdates() error {
 	// Now you can use release.TagName, release.Url, etc.
 	return nil
 
+}
+
+func saveVersion(version string) error {
+	file, err := os.Create(".meta.json")
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	encoder := json.NewEncoder(file)
+	return encoder.Encode(models.Meta{Version: version})
+}
+
+func loadVersion() (string, error) {
+	file, err := os.Open(".meta.json")
+	if err != nil {
+		return "", nil
+	}
+	defer file.Close()
+
+	var meta models.Meta
+	decoder := json.NewDecoder(file)
+	if err := decoder.Decode(&meta); err != nil {
+		return "", err
+	}
+	return meta.Version, nil
 }
 
 func doUpdate(url string) error {
