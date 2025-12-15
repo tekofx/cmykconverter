@@ -30,7 +30,12 @@ func main() {
 	}
 
 	if !utils.FileExists("imagemagick.exe") {
-		err := utils.DownloadFile("https://github.com/ImageMagick/ImageMagick/releases/download/7.1.2-11/ImageMagick-7.1.2-11-Q16-x64-dll.exe", "imagemagick.exe")
+		err := utils.DownloadFile("https://github.com/ImageMagick/ImageMagick/releases/download/7.1.2-11/ImageMagick-7.1.2-11-portable-Q16-x64.7z", "imagemagick.7z")
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		err = utils.ExtractFile("imagemagick.7z", "imagemagick")
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -60,7 +65,7 @@ func main() {
 	}
 	for _, img := range images {
 		cmd := exec.Command(
-			"./imagemagick.exe",
+			"imagemagick/magick.exe",
 			img.Filename,
 			"-colorspace",
 			"CMYK",

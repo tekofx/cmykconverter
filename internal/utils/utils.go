@@ -95,6 +95,65 @@ func FileExists(filename string) bool {
 	}
 	return !info.IsDir()
 }
+func ExtractFile(zipPath, destDir string) error {
+	r, err := sevenzip.OpenReader(zipPath)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+
+	if err := os.MkdirAll(destDir, 0755); err != nil {
+		return err
+	}
+
+	for _, f := range r.File {
+		// Skip the root directory entry itself (if any)
+		if isRootDir(f.Name) {
+			continue
+		}
+
+		// Remove the first directory component (e.g., "project/" from "project/file.txt")
+		trimmedName := trimFirstDir(f.Name)
+
+		filePath := filepath.Join(destDir, trimmedName)
+
+		if !strings.HasPrefix(filePath, filepath.Clean(destDir)+string(os.PathSeparator)) {
+			continue // Skip unsafe paths
+		}
+
+		if f.FileInfo().IsDir() {
+			if err := os.MkdirAll(filePath, f.Mode()); err != nil {
+				return err
+			}
+			continue
+		}
+
+		if err := os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
+			return err
+		}
+
+		srcFile, err := f.Open()
+		if err != nil {
+			return err
+		}
+
+		dstFile, err := os.Create(filePath)
+		if err != nil {
+			srcFile.Close()
+			return err
+		}
+
+		_, err = io.Copy(dstFile, srcFile)
+		srcFile.Close()
+		dstFile.Close()
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
 
 func FolderExists(filename string) bool {
 	info, err := os.Stat(filename)
@@ -123,26 +182,6 @@ func DownloadFile(url string, filepath string) error {
 	_, err = io.Copy(out, resp.Body)
 	if err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func ExtractFile(zipPath, destDir string) error {
-	r, err := sevenzip.OpenReader(zipPath)
-	if err != nil {
-		return err
-	}
-	defer r.Close()
-
-	for _, f := range r.File {
-		rc, err := f.Open()
-		if err != nil {
-			return err
-		}
-		defer rc.Close()
-
-		// Extract the file
 	}
 
 	return nil
